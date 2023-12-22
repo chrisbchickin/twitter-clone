@@ -22,7 +22,7 @@ export function InfiniteTweetList({
   isError,
   isLoading,
   fetchNewTweets,
-  hasMore,
+  hasMore = false,
 }: InfiniteTweetListProps) {
     if (isLoading) return <h1>loading...</h1>
     if (isError) return <h1>Error...</h1>
