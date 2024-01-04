@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
 import { api } from "~/utils/api";
-import { useEffect, useState } from "react";
 
 type Tweet = {
   id: string;
