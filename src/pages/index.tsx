@@ -21,8 +21,6 @@ function RecentTweets() {
     { getNextPageParam: (lastPage) => lastPage.nextCursor },
   );
 
-    console.log(!!tweets.hasNextPage);
-
   return (
     <InfiniteTweetList
       tweets={tweets.data?.pages.flatMap((page) => page.tweets)}
