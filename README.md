@@ -3,7 +3,7 @@
 ## Description
 This application is an imitation of Twitter and brings the familiar microblogging experience to life with a powerful and modern tech stack. Built with Next.js, tRPC, Prisma, and Tailwind CSS, it combines lightning-fast performance, intuitive UI, and secure data management.
 ## Table of Contents
-- [Images] (#images)
+- [Images](#images)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Credits](#credits)
