@@ -3,7 +3,7 @@
 ## Description
 This application is an imitation of Twitter and brings the familiar microblogging experience to life with a powerful and modern tech stack. Built with Next.js, tRPC, Prisma, and Tailwind CSS, it combines lightning-fast performance, intuitive UI, and secure data management.
 ## Table of Contents
-
+- [Images](#images)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Credits](#credits)
@@ -12,6 +12,9 @@ This application is an imitation of Twitter and brings the familiar microbloggin
 - [Tests](#tests)
 - [Username](#Username)
 - [Email](#Email)
+
+## Images
+![image](https://github.com/chrisbchickin/twitter-clone/assets/115959478/9ddf6a4d-9582-42ea-9e65-14241f9a1f42)
 
 ## Installation
 Node.js and npm: Ensure you have Node.js (version 14 or later) and npm installed on your machine. Download from https://nodejs.org/ if needed.
