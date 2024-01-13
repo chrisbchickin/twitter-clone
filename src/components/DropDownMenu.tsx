@@ -4,22 +4,44 @@ import { useState } from "react";
 import { IoIosMore } from "react-icons/io";
 import { api } from "~/utils/api";
 
+type DropDownMenuProps = {
+  tweetId: string;
+};
+
 type DropDownItemProps = {
   icon?: React.ReactNode;
   handleClick: () => void;
 };
 
-type DropDownMenuProps = { TweetId: string };
-
-export function DropDownMenu({ TweetId }: DropDownMenuProps) {
+export function DropDownMenu({ tweetId }: DropDownMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const trpcUtils = api.useContext();
-  const deleteTweet = api.tweet.delete.useMutation();
+  const deleteTweet = api.tweet.delete.useMutation({
+    onSuccess: () => {
+      const updateData: Parameters<
+        typeof trpcUtils.tweet.infiniteFeed.setInfiniteData
+      >[1] = oldData => {
+        if (oldData == null) return;
 
-  function handleClick() {
-    deleteTweet.mutate({ id: TweetId });
+        return {
+          ...oldData,
+          pages: oldData.pages.map(page => {
+            return {
+              ...page,
+              tweets: page.tweets.filter(tweet => tweet.id !== tweetId),
+            };
+          }),
+        };
+      };
+
+      trpcUtils.tweet.infiniteFeed.setInfiniteData({}, updateData);
+    },
+  });
+
+  function handleDelete() {
+    deleteTweet.mutate({ id: tweetId });
   }
-  
+
   return (
     <div className="relative">
       <button
@@ -29,9 +51,9 @@ export function DropDownMenu({ TweetId }: DropDownMenuProps) {
         <IoIosMore style={{ fontSize: "24px" }} />
       </button>
       {isOpen && (
-        <ul className="z-100 absolute mt-1 max-h-60 overflow-auto rounded-md py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-          <DropDownItem handleClick={handleClick} icon={<MdEdit />} />
-          <DropDownItem handleClick={handleClick} icon={<MdDelete />} />
+        <ul className=" absolute mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <DropDownItem handleClick={handleDelete} icon={<MdDelete />} />
+          <DropDownItem handleClick={handleDelete} icon={<MdEdit />} />
         </ul>
       )}
     </div>
