@@ -26,7 +26,7 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (!isNode(event.target)) {
         setIsOpen(false);
-      } else if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      } else if (!dropdownRef.current?.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
