@@ -24,14 +24,16 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
   const dropdownRef = useRef<HTMLUListElement>(null);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isNode(event.target) ?? (dropdownRef.current && !dropdownRef.current.contains(event.target as Node))) {
+      if (!isNode(event.target)) {
+        setIsOpen(false);
+      } else if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-  
+
     document.addEventListener('mousedown', handleClickOutside);
-  
-   
+
+
   return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -75,7 +77,7 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
       </button>
       </IconHoverEffect>}
       {isOpen && (
-        <ul ref={dropdownRef} className=" absolute top-0 right-0 mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+        <ul ref={dropdownRef} className="absolute top-0 right-0 mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-index: 9999">
           <DropDownItem handleClick={handleDelete} icon={<MdEdit />} />
           <DropDownItem handleClick={handleDelete} icon={<MdDelete />} />
         </ul>
