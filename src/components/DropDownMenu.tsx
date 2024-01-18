@@ -1,21 +1,22 @@
-import { MdDelete } from "react-icons/md";
-import { MdEdit } from "react-icons/md";
-import { useState, useRef, useEffect } from "react";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { useState, useRef, useEffect, SetStateAction, ReactNode } from "react";
 import { IoIosMore } from "react-icons/io";
 import { api } from "~/utils/api";
 import { IconHoverEffect } from "./IconHoverEffect";
 
 type DropDownMenuProps = {
   tweetId: string;
+  setIsFormOpen: React.Dispatch<SetStateAction<boolean>>;
 };
 
 type DropDownItemProps = {
   icon?: React.ReactNode;
   handleClick: () => void;
+  children: ReactNode;
 };
 
-export function DropDownMenu({ tweetId }: DropDownMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function DropDownMenu({ tweetId, setIsFormOpen }: DropDownMenuProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function isNode(target: EventTarget | null): target is Node {
     return target !== null && typeof target === 'object' && 'nodeType' in target;
@@ -25,9 +26,9 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!isNode(event.target)) {
-        setIsOpen(false);
+        setIsMenuOpen(false);
       } else if (!dropdownRef.current?.contains(event.target)) {
-        setIsOpen(false);
+        setIsMenuOpen(false);
       }
     };
 
@@ -37,7 +38,7 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
   return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isMenuOpen]);
 
   const trpcUtils = api.useContext();
   const deleteTweet = api.tweet.delete.useMutation({
@@ -66,35 +67,40 @@ export function DropDownMenu({ tweetId }: DropDownMenuProps) {
     deleteTweet.mutate({ id: tweetId });
   }
 
+  function handleEdit() {
+    setIsFormOpen(true);
+  }
+
   return (
     <div className="relative">
-      {!isOpen && <IconHoverEffect>
+      {!isMenuOpen && <IconHoverEffect>
       <button
         className="w-15 relative cursor-default px-2 py-2 text-left hover:cursor-pointer focus:outline-none focus-visible:border-orange-300 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
         <IoIosMore style={{ fontSize: "24px" }} />
       </button>
       </IconHoverEffect>}
-      {isOpen && (
-        <ul ref={dropdownRef} className="absolute top-0 right-0 mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-index: 9999">
-          <DropDownItem handleClick={handleDelete} icon={<MdEdit />} />
-          <DropDownItem handleClick={handleDelete} icon={<MdDelete />} />
+      {isMenuOpen && (
+        <ul ref={dropdownRef} className="absolute top-0 right-0 mt-1 max-h-60 overflow-auto rounded-md bg-white py-1 pl-1.5 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <DropDownItem handleClick={handleEdit} icon={<MdEdit />}>Edit</DropDownItem>
+          <DropDownItem handleClick={handleDelete} icon={<MdDelete />}>Delete</DropDownItem>
         </ul>
       )}
     </div>
   );
 }
 
-function DropDownItem({ icon, handleClick }: DropDownItemProps) {
+function DropDownItem({ children, icon, handleClick }: DropDownItemProps) {
   return (
     <li className="relative cursor-default select-none px-4 py-3 pr-6">
       {icon && (
         <button
           onClick={handleClick}
-          className="flex items-center justify-between"
+          className="flex items-center justify-between gap-1"
         >
           {icon}
+          {children}
         </button>
       )}
     </li>

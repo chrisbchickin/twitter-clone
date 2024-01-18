@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import type { inferAsyncReturnType } from "@trpc/server";
 import { z } from "zod";
 
-import type { createTRPCContext } from "~/server/api/trpc"
+import type { createTRPCContext } from "~/server/api/trpc";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -10,23 +10,22 @@ import {
 } from "~/server/api/trpc";
 
 export const tweetRouter = createTRPCRouter({
-  infinteProfileFeed: publicProcedure.input(
-    z.object({
-      userId: z.string(),
-      limit: z.number().optional(),
-      cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
-    }),
-  ).query(
-    async ({ input: { limit = 10, userId, cursor }, ctx }) => {
-
+  infinteProfileFeed: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+        limit: z.number().optional(),
+        cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
+      }),
+    )
+    .query(async ({ input: { limit = 10, userId, cursor }, ctx }) => {
       return await getInfiniteTweets({
         limit,
         ctx,
         cursor,
         whereClause: { userId },
       });
-    },
-  ),
+    }),
   infiniteFeed: publicProcedure
     .input(
       z.object({
@@ -66,6 +65,18 @@ export const tweetRouter = createTRPCRouter({
 
       return tweet;
     }),
+  editTweet: protectedProcedure
+    .input(z.object({ content: z.string(), id: z.string(), }))
+    .mutation(async ({ input: { content, id }, ctx }) => {
+      const tweet = await ctx.prisma.tweet.update({
+        where: { id: id },
+        data: { content: content }
+      })
+
+      void ctx.revalidateSSG?.(`/profiles/${ctx.session.user.id}`);
+
+      return tweet.content;
+    }),
   toggleLike: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx }) => {
@@ -83,11 +94,12 @@ export const tweetRouter = createTRPCRouter({
       }
     }),
   delete: protectedProcedure
-  .input(z.object({ id: z.string() }))
-  .mutation(async ({ input: { id }, ctx }) => {
-    
-    await ctx.prisma.tweet.delete({ where: { id: id }});
-  })
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input: { id }, ctx }) => {
+      await ctx.prisma.tweet.delete({
+        where: { id: id, userId: ctx.session.user.id },
+      });
+    }),
 });
 
 async function getInfiniteTweets({
