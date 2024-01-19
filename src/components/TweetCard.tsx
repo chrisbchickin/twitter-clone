@@ -162,7 +162,7 @@ export function TweetCard({
                 value={formValue}
                 maxLength={190}
                 onChange={(e) => setFormValue(e.target.value)}
-                className="flex-grow resize-none overflow-hidden pt-1 text-lg outline-none"
+                className="flex-grow overflow-hidden pt-1 text-lg outline-none"
               />
             </div>
             <div className="flex gap-3">
