@@ -1,5 +1,5 @@
 import { MdDelete, MdEdit } from "react-icons/md";
-import { useState, useRef, useEffect, SetStateAction, ReactNode } from "react";
+import { useState, useRef, useEffect, SetStateAction, ReactNode, DetailedHTMLProps, TextareaHTMLAttributes } from "react";
 import { IoIosMore } from "react-icons/io";
 import { api } from "~/utils/api";
 import { IconHoverEffect } from "./IconHoverEffect";
@@ -15,7 +15,7 @@ type DropDownItemProps = {
   children: ReactNode;
 };
 
-export function DropDownMenu({ tweetId, setIsFormOpen }: DropDownMenuProps) {
+export function DropDownMenu({ tweetId, setIsFormOpen, }: DropDownMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function isNode(target: EventTarget | null): target is Node {

@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import { DropDownMenu } from "./DropDownMenu";
 import { HeartButton } from "./HeartButton";
 import { useSession } from "next-auth/react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
 
 type Tweet = {
@@ -30,6 +30,14 @@ export function TweetCard({
 }: Tweet) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formValue, setFormValue] = useState(content);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (isFormOpen && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(formValue.length, formValue.length);
+    }
+  }, [isFormOpen, textareaRef]);
 
   const session = useSession();
   const trpcUtils = api.useContext();
@@ -91,7 +99,7 @@ export function TweetCard({
             return {
               ...page,
               tweets: page.tweets.map((tweet) => {
-                if (tweet.id === id) {  
+                if (tweet.id === id) {
                   return {
                     ...tweet,
                     content: newContent,
@@ -110,12 +118,12 @@ export function TweetCard({
         updateData,
       );
     },
-  })
+  });
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsFormOpen(false);
-    editTweet.mutate({ content: formValue, id, });
+    editTweet.mutate({ content: formValue, id });
   }
 
   return (
@@ -150,7 +158,9 @@ export function TweetCard({
           >
             <div className="flex w-5/6">
               <textarea
+                ref={textareaRef}
                 value={formValue}
+                maxLength={190}
                 onChange={(e) => setFormValue(e.target.value)}
                 className="flex-grow resize-none overflow-hidden pt-1 text-lg outline-none"
               />

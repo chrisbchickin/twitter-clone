@@ -28,12 +28,12 @@ function Form() {
     updateTextAreaSize(textArea);
     textAreaRef.current = textArea;
   }, []);
-  const trpcUtils = api.useContext();
-
+  
   useLayoutEffect(() => {
     updateTextAreaSize(textAreaRef.current);
   }, [inputValue]);
-
+  
+  const trpcUtils = api.useContext();
   const createTweet = api.tweet.create.useMutation({ onSuccess: NewTweet => { 
     setInputValue("");
 
