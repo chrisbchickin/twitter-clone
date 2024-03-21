@@ -1,12 +1,13 @@
 import { MdDelete, MdEdit } from "react-icons/md";
-import { useState, useRef, useEffect, SetStateAction, ReactNode, DetailedHTMLProps, TextareaHTMLAttributes } from "react";
+import { useState, useRef, useEffect, SetStateAction, ReactNode, DetailedHTMLProps, TextareaHTMLAttributes, Dispatch } from "react";
 import { IoIosMore } from "react-icons/io";
 import { api } from "~/utils/api";
 import { IconHoverEffect } from "./IconHoverEffect";
+import { ACTIONS, ActionsType } from "./TweetCard";
 
 type DropDownMenuProps = {
   tweetId: string;
-  setIsFormOpen: React.Dispatch<SetStateAction<boolean>>;
+  dispatch: Dispatch<ActionsType>
 };
 
 type DropDownItemProps = {
@@ -15,7 +16,7 @@ type DropDownItemProps = {
   children: ReactNode;
 };
 
-export function DropDownMenu({ tweetId, setIsFormOpen, }: DropDownMenuProps) {
+export function DropDownMenu({ tweetId, dispatch }: DropDownMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   function isNode(target: EventTarget | null): target is Node {
@@ -68,7 +69,7 @@ export function DropDownMenu({ tweetId, setIsFormOpen, }: DropDownMenuProps) {
   }
 
   function handleEdit() {
-    setIsFormOpen(true);
+    dispatch({ type: ACTIONS.OPEN_FORM })
   }
 
   return (

@@ -4,8 +4,8 @@ import { api } from "~/utils/api";
 import { DropDownMenu } from "./DropDownMenu";
 import { HeartButton } from "./HeartButton";
 import { useSession } from "next-auth/react";
-import { FormEvent, useEffect, useRef, useState } from "react";
-import { Button } from "./Button";
+import { useReducer } from "react";
+import { EditTweetForm } from "./EditTweetForm";
 
 type Tweet = {
   id: string;
@@ -15,6 +15,26 @@ type Tweet = {
   likedByMe: boolean;
   user: { id: string; image: string | null; name: string | null };
 };
+
+export type ReducerState = {
+  isFormOpen: boolean;
+  formValue: string;
+};
+
+export const ACTIONS = {
+  CLOSE_FORM: "close-form",
+  OPEN_FORM: "open-form",
+  SET_FORM_VALUE: "set-form-value",
+} as const;
+
+export type ActionsType =
+  | {
+      type: "close-form" | "open-form"
+    }
+  | {
+      type: "set-form-value";
+      payload: string;
+    };
 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
   dateStyle: "short",
@@ -28,19 +48,10 @@ export function TweetCard({
   likeCount,
   likedByMe,
 }: Tweet) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [formValue, setFormValue] = useState(content);
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    if (isFormOpen && textareaRef.current) {
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(formValue.length, formValue.length);
-    }
-  }, [isFormOpen, textareaRef]);
-
   const session = useSession();
   const trpcUtils = api.useContext();
+
+
   const toggleLike = api.tweet.toggleLike.useMutation({
     onSuccess: ({ addedLike }) => {
       const updateData: Parameters<
@@ -82,49 +93,31 @@ export function TweetCard({
     },
   });
 
+
+  const [state, dispatch] = useReducer(reducer, {
+    isFormOpen: false,
+    formValue: content,
+  });
+
+
   function handleToggleLike() {
     toggleLike.mutate({ id });
   }
 
-  const editTweet = api.tweet.editTweet.useMutation({
-    onSuccess: (newContent) => {
-      const updateData: Parameters<
-        typeof trpcUtils.tweet.infiniteFeed.setInfiniteData
-      >[1] = (oldData) => {
-        if (oldData == null) return;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => {
-            return {
-              ...page,
-              tweets: page.tweets.map((tweet) => {
-                if (tweet.id === id) {
-                  return {
-                    ...tweet,
-                    content: newContent,
-                  };
-                }
-                return tweet;
-              }),
-            };
-          }),
-        };
-      };
-
-      trpcUtils.tweet.infiniteFeed.setInfiniteData({}, updateData);
-      trpcUtils.tweet.infinteProfileFeed.setInfiniteData(
-        { userId: user.id },
-        updateData,
-      );
-    },
-  });
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsFormOpen(false);
-    editTweet.mutate({ content: formValue, id });
+  function reducer(state: ReducerState, actions: ActionsType) {
+    switch (actions.type) {
+      case ACTIONS.CLOSE_FORM:
+        return { ...state, isFormOpen: false };
+      case ACTIONS.OPEN_FORM:
+        return { ...state, isFormOpen: true };
+      case ACTIONS.SET_FORM_VALUE:
+        return { ...state, formValue: actions.payload };
+      default:
+        return state;
+    }
   }
+
 
   return (
     <li className="flex gap-4 border-b px-4 py-4">
@@ -146,43 +139,13 @@ export function TweetCard({
           <div className="absolute right-0 top-0 self-center">
             {session.status === "authenticated" &&
               session.data.user.id === user.id &&
-              !isFormOpen && (
-                <DropDownMenu tweetId={id} setIsFormOpen={setIsFormOpen} />
+              !state.isFormOpen && (
+                <DropDownMenu tweetId={id} dispatch={dispatch} />
               )}
           </div>
         </div>
-        {isFormOpen ? (
-          <form
-            onSubmit={handleSubmit}
-            className="flex h-1/3 justify-between gap-1 border-b"
-          >
-            <div className="flex w-5/6">
-              <textarea
-                ref={textareaRef}
-                value={formValue}
-                maxLength={190}
-                onChange={(e) => setFormValue(e.target.value)}
-                className="flex-grow resize-none overflow-hidden pt-1 text-lg outline-none"
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setFormValue(content);
-                  setIsFormOpen(false);
-                }}
-                className="mb-1 px-4 py-0"
-                small
-                gray
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="mb-1 px-4 py-0" small>
-                Save
-              </Button>
-            </div>
-          </form>
+        {state.isFormOpen ? (
+          <EditTweetForm dispatch={dispatch} state={state} id={id} content={content} user={user}/>
         ) : (
           <p className="whitespace-pre-wrap">{content}</p>
         )}
